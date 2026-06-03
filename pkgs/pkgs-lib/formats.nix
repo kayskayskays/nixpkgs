@@ -1079,7 +1079,7 @@ optionalAttrs allowAliases aliases
       generate = name: value: pkgs.writeText name (lib.generators.toPlist { inherit escape; } value);
 
       data = value: {
-        __plistDataTag = "data";
+        _type = "plist-data";
         base64 = value;
       };
     };

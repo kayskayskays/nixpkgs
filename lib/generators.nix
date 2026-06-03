@@ -649,15 +649,15 @@ rec {
     v:
     let
 
-      /** Whether `x` is an attribute set containing the `__plistDataTag` attribute. */
-      hasPlistDataTag = x:
+      /** Whether `x` is an attribute set containing the `_type` attribute. */
+      isAttrsWithTypeTag = x:
         isAttrs x
-        && x ? __plistDataTag;
+        && x ? _type;
 
       /** Whether `x` is an attribute set containing base-64 encoded data, to be interpolated into a `data` element. */
       isData = x:
-        hasPlistDataTag x
-        && x.__plistDataTag == "data"
+        isAttrsWithTypeTag x
+        && x._type == "plist-data"
         && x ? base64
         && isString x.base64;
 
@@ -675,8 +675,8 @@ rec {
           list ind x
         else if isData x then
           data ind x
-        else if hasPlistDataTag x then
-          abort "generators.toPlist: unexpected tag: __plistDataTag = ${x.__plistType}"
+        else if isAttrsWithTypeTag x then
+          abort "generators.toPlist: unexpected type: _type = ${x._type}"
         else if isAttrs x then
           attrs ind x
         else if isPath x then
