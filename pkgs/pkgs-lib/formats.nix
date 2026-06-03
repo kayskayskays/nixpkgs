@@ -1052,16 +1052,36 @@ optionalAttrs allowAliases aliases
               float
               str
               path
+              dataType
               (attrsOf valueType)
               (listOf valueType)
             ])
             // {
               description = "Property list (plist) value";
             };
+
+          dataType = submodule {
+             options = {
+                __plistDataTag = mkOption {
+                type = enum [ "data" ];
+                internal = true;
+              };
+
+              base64 = mkOption {
+                type = str;
+                description = "Base64-encoded property list (plist) data value.";
+              };
+             };
+          };
         in
         valueType;
 
       generate = name: value: pkgs.writeText name (lib.generators.toPlist { inherit escape; } value);
+
+      data = value: {
+        __plistDataTag = "data";
+        base64 = value;
+      };
     };
 
   hcl1 =

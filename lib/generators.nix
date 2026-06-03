@@ -648,6 +648,19 @@ rec {
     }:
     v:
     let
+
+      /** Whether `x` is an attribute set containing the `__plistDataTag` attribute. */
+      hasPlistDataTag = x:
+        isAttrs x
+        && x ? __plistDataTag;
+
+      /** Whether `x` is an attribute set containing base-64 encoded data, to be interpolated into a `data` element. */
+      isData = x:
+        hasPlistDataTag x
+        && x.__plistDataTag == "data"
+        && x ? base64
+        && isString x.base64;
+
       expr =
         ind: x:
         if x == null then
@@ -660,6 +673,10 @@ rec {
           str ind x
         else if isList x then
           list ind x
+        else if isData x then
+          data ind x
+        else if hasPlistDataTag x then
+          abort "generators.toPlist: unexpected tag: __plistDataTag = ${x.__plistType}"
         else if isAttrs x then
           attrs ind x
         else if isPath x then
@@ -678,6 +695,7 @@ rec {
       str = ind: x: literal ind "<string>${maybeEscapeXML x}</string>";
       key = ind: x: literal ind "<key>${maybeEscapeXML x}</key>";
       float = ind: x: literal ind "<real>${toString x}</real>";
+      data = ind: x: literal ind "<data>${x.base64}</data>";
 
       indent = ind: expr "\t${ind}";
 
